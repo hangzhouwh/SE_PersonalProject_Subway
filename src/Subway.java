@@ -19,8 +19,6 @@ public class Subway {
         String stationName;
         // 所属地铁线
         List<String> lineOfStation;
-        // 可否换乘
-        boolean isTramsfer = false;
     }
 
     /**
@@ -63,9 +61,10 @@ public class Subway {
                 loadSubwayMessage(args[1]);
             }
         }
-        // java Subway -q 1号线 -map subway.txt -o station.txt
+        // java Subway -q 1号线 -map subway.txt -o line.txt
+        // java Subway -s 军事博物馆 -map subway.txt -o station.txt
         else if(args.length == 6){
-            if (!"-q".equals(args[0]) || !"-map".equals(args[2]) || !"-o".equals(args[4])){
+            if ((!"-q".equals(args[0]) && !"-s".equals(args[0])) || !"-map".equals(args[2]) || !"-o".equals(args[4])){
                 System.out.println("command error, please enter the correct parameters");
             }
             else if (!args[3].contains(".txt") || !args[5].contains(".txt")){
@@ -73,7 +72,11 @@ public class Subway {
             }
             else {
                 loadSubwayMessage(args[3]);
-                getLine(args[1], args[5]);
+                if ("-q".equals(args[0])){
+                    getLine(args[1], args[5]);
+                }else {
+                    getStation(args[1], args[5]);
+                }
             }
         }
         // java Subway -b 苹果园 军事博物馆 -map subway.txt -o routine.txt
@@ -142,7 +145,6 @@ public class Subway {
                     }else{
                         station = stationNameMapStation.get(stationName);
                         station.lineOfStation.add(line.lineName);
-                        station.isTramsfer = true;
                     }
                     line.stations.add(station);
 
@@ -216,6 +218,38 @@ public class Subway {
         in.close();
         System.out.println();
         System.out.println("Query the designated subway line successful!");
+    }
+
+    /**
+     * 查询指定地铁站
+     * @param stationName 待查询地铁站名称
+     * @param outFilePath 查询结果输出文件路径
+     * @throws Exception
+     */
+    public static void getStation(String stationName, String outFilePath) throws Exception {
+        if (!stationNameMapStation.containsKey(stationName)){
+            throw new Exception("There is no station, please confirm!");
+        }
+        System.out.println("Query the station starting!");
+        Station station = stationNameMapStation.get(stationName);
+        String text = stationName + ":";
+        for (String line:station.lineOfStation){
+            text = text + "\n" + line;
+        }
+        char[] outText = text.toCharArray();
+        File file = new File(outFilePath);
+        FileWriter out = new FileWriter(file);
+        out.write(outText);
+        out.close();
+        FileReader in = new FileReader(file);
+        char[] buf = new char[4];
+        int len;
+        while((len = in.read(buf)) != -1){
+            System.out.print(new String(buf, 0, len));
+        }
+        in.close();
+        System.out.println();
+        System.out.println("Query the station successful!");
     }
 
     /**
