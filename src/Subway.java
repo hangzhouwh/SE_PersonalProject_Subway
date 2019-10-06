@@ -50,7 +50,7 @@ public class Subway {
      */
     static Graph graph;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         // java Subway -map subway.txt
         if(args.length == 2) {
             if (!"-map".equals(args[0])){
@@ -179,7 +179,10 @@ public class Subway {
      * @param outFilePath 查询结果输出文件路径
      * @throws IOException
      */
-    public static void getLine(String lineName, String outFilePath) throws IOException {
+    public static void getLine(String lineName, String outFilePath) throws Exception {
+        if (!linesMap.containsKey(lineName)){
+            throw new Exception("There is no subway line, please confirm!");
+        }
         System.out.println("Query the designated subway line starting!");
         Line line = linesMap.get(lineName);
         String text = lineName + ": ";
@@ -223,7 +226,13 @@ public class Subway {
      * @param outFilePath 输出文件路径
      * @throws IOException
      */
-    public static void getShortPath(String begin, String end, String outFilePath) throws IOException {
+    public static void getShortPath(String begin, String end, String outFilePath) throws Exception {
+        if (!stationNameMapStation.containsKey(begin)){
+            throw new Exception("The departure point does not exist in the subway line, please confirm!");
+        }
+        if (!stationNameMapStation.containsKey(end)){
+            throw new Exception("The destination does not exist on the subway line, please confirm!");
+        }
         System.out.println("getShortPath starting!");
 
         /* Dijkstra单源最短路径算法*/
