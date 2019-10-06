@@ -97,9 +97,10 @@ public class Subway {
         }
 
         // 直接运行测试
-//        String filepath = "D:\\WorkSpace\\Idea\\Subway\\src\\subway.txt";
-//        loadSubwayMessage(filepath);
-//        getShortPath("苹果园", "军事博物馆", "x");
+        String filepath = "D:\\WorkSpace\\Idea\\Subway\\src\\subway.txt";
+        loadSubwayMessage(filepath);
+//        getStation("军事博物馆", "station.txt");
+        getShortPath("苹果园", "北京西站", "routine.txt");
     }
 
     /**
@@ -191,32 +192,7 @@ public class Subway {
         for (Station station:line.stations){
             text = text + station.stationName + " ";
         }
-        char[] outText = text.toCharArray();
-
-        /* 将text内容通过输出流写到文件*/
-
-        // 创建表示hello2.txt文件的File对象
-        File file = new File(outFilePath);
-        // 创建文件输出字符流对象
-        FileWriter out = new FileWriter(file);
-        // 将text字节数组的内容写入输出流
-        out.write(outText);
-        out.close();
-
-        /*将文件内容通过输入流读取并显示到屏幕*/
-
-        // 创建文件字符输入流对象
-        FileReader in = new FileReader(file);
-        // buf为长度为4的char数组，作用是缓冲区
-        char[] buf = new char[4];
-        int len;
-        // 通过循环依次从输出流读取数据
-        while((len = in.read(buf)) != -1){
-            // 在屏幕输出读到的数据
-            System.out.print(new String(buf, 0, len));
-        }
-        in.close();
-        System.out.println();
+        FileOperation.writeFile(text, outFilePath);
         System.out.println("Query the designated subway line successful!");
     }
 
@@ -236,19 +212,7 @@ public class Subway {
         for (String line:station.lineOfStation){
             text = text + "\n" + line;
         }
-        char[] outText = text.toCharArray();
-        File file = new File(outFilePath);
-        FileWriter out = new FileWriter(file);
-        out.write(outText);
-        out.close();
-        FileReader in = new FileReader(file);
-        char[] buf = new char[4];
-        int len;
-        while((len = in.read(buf)) != -1){
-            System.out.print(new String(buf, 0, len));
-        }
-        in.close();
-        System.out.println();
+        FileOperation.writeFile(text, outFilePath);
         System.out.println("Query the station successful!");
     }
 
@@ -361,20 +325,7 @@ public class Subway {
         }
 //        System.out.println(text);
 
-        char[] outText = text.toCharArray();
-        File file = new File(outFilePath);
-        FileWriter out = new FileWriter(file);
-        out.write(text);
-        out.close();
-
-        FileReader in = new FileReader(file);
-        char[] buf = new char[4];
-        int bufLen;
-        while((bufLen = in.read(buf))!= -1) {
-            System.out.print(new String(buf,0,bufLen));
-        }
-        in.close();
-
+        FileOperation.writeFile(text, outFilePath);
         System.out.println("getShortPath successful!");
     }
 }
