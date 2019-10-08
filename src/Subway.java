@@ -1,3 +1,6 @@
+import sun.awt.windows.WPrinterJob;
+
+import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +22,8 @@ public class Subway {
         String stationName;
         // 所属地铁线
         List<String> lineOfStation;
+        // 是否是换乘站
+        boolean isTranfer = false;
     }
 
     /**
@@ -80,6 +85,11 @@ public class Subway {
             }
         }
         // java Subway -b 苹果园 军事博物馆 -map subway.txt -o routine.txt
+        // java Subway -b 苹果园 国家图书馆 -map subway.txt -o routine.txt
+        // java Subway -b 苹果园 北京西站 -map subway.txt -o routine.txt
+        // java Subway -b 张郭庄 六里桥 -map subway.txt -o routine.txt
+        // java Subway -b 北安河 白堆子 -map subway.txt -o routine.txt
+        // java Subway -b 国家图书馆 木樨地 -map subway.txt -o routine.txt
         else if(args.length == 7){
             if (!"-b".equals(args[0]) || !"-map".equals(args[3]) || !"-o".equals(args[5])){
                 System.out.println("command error, please enter the correct parameters");
@@ -99,8 +109,7 @@ public class Subway {
         // 直接运行测试
         String filepath = "D:\\WorkSpace\\Idea\\Subway\\src\\subway.txt";
         loadSubwayMessage(filepath);
-//        getStation("军事博物馆", "station.txt");
-        getShortPath("苹果园", "北京西站", "routine.txt");
+        getShortPath("国家图书馆", "木樨地", "routine.txt");
     }
 
     /**
@@ -146,6 +155,9 @@ public class Subway {
                     }else{
                         station = stationNameMapStation.get(stationName);
                         station.lineOfStation.add(line.lineName);
+                    }
+                    if (station.lineOfStation.size()>1){
+                        station.isTranfer = true;
                     }
                     line.stations.add(station);
 
@@ -292,33 +304,64 @@ public class Subway {
         /* 将最短路径以及换乘信息输出到文件 */
         String text = "";
         for (int i=path.size()-1; i>=0; i--){
+            // 中转站，且不是目的地
             Station station = path.get(i);
             List<String> lines = station.lineOfStation;
             text = text + station.stationName + "(";
+
             if (lines.size()!=1 && i!=0){
-                int preIdx = i+1;
-                int nextIdx = i-1;
-                while (path.get(preIdx).lineOfStation.size() != 1 && preIdx < path.size()-1){
+                int preIdx = i;
+                int nextIdx = i;
+                while (path.get(preIdx).isTranfer == true && preIdx < path.size()-1){
                     preIdx = preIdx + 1;
                 }
-                while (path.get(nextIdx).lineOfStation.size() != 1 && nextIdx > 1){
+                while (path.get(nextIdx).isTranfer == true && nextIdx > 0){
                     nextIdx = nextIdx - 1;
                 }
                 Station preStation = path.get(preIdx);
                 Station nextStation = path.get(nextIdx);
+                String preStationLine = null;
+                String nextStationLine = null;
                 if (!preStation.lineOfStation.get(0).equals(nextStation.lineOfStation.get(0))){
-                    if (station.lineOfStation.contains(preStation.lineOfStation.get(0)) && station.lineOfStation.contains(nextStation.lineOfStation.get(0))){
-                        text = text + preStation.lineOfStation.get(0) + " 换乘 " + nextStation.lineOfStation.get(0);
-                    }else if (station.lineOfStation.contains(preStation.lineOfStation.get(0)) && !station.lineOfStation.contains(nextStation.lineOfStation.get(0))){
-                        text = text + preStation.lineOfStation.get(0);
-                    }else if (!station.lineOfStation.contains(preStation.lineOfStation.get(0)) && station.lineOfStation.contains(nextStation.lineOfStation.get(0))){
-                        text = text + nextStation.lineOfStation.get(0);
+                    int flag1 = 0;
+                    int flag2 = 0;
+                    for (String preLine:path.get(preIdx).lineOfStation){
+                        if (station.lineOfStation.contains(preLine)){
+                            flag1 = 1;
+                            preStationLine = preLine;
+                        }
+                    }
+                    for (String nextLine:path.get(nextIdx).lineOfStation){
+                        if (station.lineOfStation.contains(nextLine)){
+                            flag2 = 1;
+                            nextStationLine = nextLine;
+                        }
+                    }
+                    if ((flag1 == 1) && (flag2 == 1)){
+                        if (!preStationLine.equals(nextStationLine)){
+                            text = text + preStationLine + " 换乘 " + nextStationLine;
+                        }else{
+                            text = text + preStationLine;
+                        }
+                    }else if (flag1 == 1 && flag2 == 0){
+                        text = text + preStationLine;
+                    }else if ((flag1 == 0) && (flag2 == 1)){
+                        text = text + nextStationLine;
                     }
                 }else {
                     text = text + nextStation.lineOfStation.get(0);
                 }
-
-            }else {
+            }else if (i == 0){
+                int preIdx = 1;
+                Station preStation = path.get(preIdx);
+                for (String endLine:station.lineOfStation){
+                    for (String preLine:path.get(preIdx).lineOfStation){
+                        if (endLine.equals(preLine)){
+                            text = text + endLine;
+                        }
+                    }
+                }
+            }else{
                 text = text + lines.get(0);
             }
             text = text + ")\n";
